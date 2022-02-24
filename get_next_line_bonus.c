@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: msoler-e <msoler-e@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/08 14:39:21 by msoler-e          #+#    #+#             */
-/*   Updated: 2022/02/23 09:34:13 by msoler-e         ###   ########.fr       */
+/*   Created: 2022/02/21 09:44:27 by msoler-e          #+#    #+#             */
+/*   Updated: 2022/02/23 12:28:41 by msoler-e         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
-char	*sobrantlinea(char *temp)
+char	*update(char *temp)
 {
 	char	*str;
 	int		x;
@@ -25,6 +25,21 @@ char	*sobrantlinea(char *temp)
 	str = ft_substr(temp, x, ft_strlen(temp) - x);
 	free(temp);
 	return (str);
+}
+
+char	*save(char *temp)
+{
+	char	*result;
+	int		i;
+
+	i = 0;
+	if (!temp[0])
+		return (NULL);
+	while (temp[i] != '\n' && temp[i] != '\0')
+		i++;
+	i++;
+	result = ft_substr(temp, 0, i);
+	return (result);
 }
 
 char	*readline(int fd, char *temp)
@@ -54,24 +69,19 @@ char	*readline(int fd, char *temp)
 char	*get_next_line(int fd)
 {
 	char		*result;
-	static char	*tmp;
-	int			x;
+	static char	*tmp[PATH_MAX];
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (0);
-	tmp = readline(fd, tmp);
-	if (!tmp || !tmp[0])
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd > PATH_MAX)
+		return (NULL);
+	if (!tmp[fd])
+		tmp[fd] = NULL;
+	tmp[fd] = readline(fd, tmp[fd]);
+	if (!tmp[fd] || !tmp[fd][0])
 	{
-		free(tmp);
+		free(tmp[fd]);
 		return (NULL);
 	}
-	if (!tmp[0])
-		return (NULL);
-	x = 0;
-	while (tmp[x] != '\n' && tmp[x] != '\0')
-		x++;
-	x++;
-	result = ft_substr(tmp, 0, x);
-	tmp = sobrantlinea(tmp);
+	result = save(tmp[fd]);
+	tmp[fd] = update(tmp[fd]);
 	return (result);
 }
